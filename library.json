@@ -1,0 +1,21 @@
+{
+  "name": "HX1230Menu",
+  "keywords": "stm32, stm32cube, hx1230, menu system",
+  "description": "Menu system for HX1230 96x68 LCD screen in PlatformIO STM32 environment.",
+  "license": "BSD-3-Clause",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/RockerM4NHUN/HX1230Menu.git"
+  },
+  "authors":
+  {
+    "name": "ZOMBORI Dániel",
+    "email": "rockerm4nhun@gmail.com",
+    "url": "https://github.com/RockerM4NHUN",
+    "maintainer": true
+  },
+  "version": "0.1.0",
+  "frameworks": "stm32cube",
+  "platforms": "stm32, ststm32"
+}
