@@ -146,20 +146,6 @@ void menu_refresh_controls(struct menu_controls* controls){
   prev_button = joystick.button == debounce_cycles;
 }
 
-int32_t time_value;
-void menu_redraw_loop(){
-  static uint32_t next = 0;
-  uint32_t tick = HAL_GetTick();
-  if (tick > next){
-    
-    // if getters are needed for menu values, they should be here
-    time_value = tick;
-    
-    menu_redraw();
-    next = tick + 250;
-  }
-}
-
 void joystick_test_loop(){
   static uint8_t first = 1;
   static uint8_t refresh = 1;
@@ -235,6 +221,23 @@ struct menu_toggle test_toggle2 = {
 };
 
 
+int32_t time_value;
+char toggle_str[5];
+
+void menu_redraw_loop(){
+  static uint32_t next = 0;
+  uint32_t tick = HAL_GetTick();
+  if (tick > next){
+    
+    // if getters are needed for menu values, they should be here
+    time_value = tick;
+    sprintf(toggle_str, "%s", test_toggle.value ? "ON" : "OFF");
+    
+    menu_redraw();
+    next = tick + 250;
+  }
+}
+
 struct submenu_t demo_menu, sub_menu;
 
 struct submenu_t sub_menu = {
@@ -258,7 +261,9 @@ struct submenu_t demo_menu = {
     {TOGGLE, "Toggle",          NULL,         &test_toggle},
     {SLIDER, "Slider",          NULL,         &setpoint_slider},
     {MODE,   "Custom mode",     joystick_test_loop},
-    {INT32,  "int16 value: %i", NULL,         &setpoint_slider.value},
+    {STRING, "Toggle: %s", NULL,         toggle_str},
+    {STRING, "string: %s", NULL,         "hi =)"},
+    {INT32,  "int32 value: %i", NULL,         &setpoint_slider.value},
     {LABEL,  "-------"},
     {LABEL,  "Lots"},
     {LABEL,  "of"},
@@ -282,6 +287,7 @@ struct submenu_t demo_menu = {
     {LABEL,  "1011"},
     {LABEL,  "1001"},
     {LABEL,  "1000"},
+    {LABEL,  "-------"},
     {MENU_END},
   },
 };
