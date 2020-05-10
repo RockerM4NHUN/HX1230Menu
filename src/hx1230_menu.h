@@ -14,8 +14,9 @@ typedef void(*menu_function)(void* data);
 
 typedef enum {
   MENU_END = 0,
-  TITLE,
-  VALUE,
+  LABEL = 1,
+  STRING = 2,
+  INT32 = 3, // INT32 must have the biggest value that can be modified, it may differ from current value
   MODE,
   MENU,
   BACK,
@@ -34,9 +35,9 @@ struct menu_option{
 struct submenu_t{
   struct submenu_t* parent;
   struct menu_option* options;
-  uint8_t _len;
-  uint8_t _cursor;
-  uint8_t _scrn_cursor;
+  uint16_t _len;
+  uint16_t _cursor;
+  uint16_t _scrn_cursor;
 };
 
 struct menu_controls{
@@ -49,10 +50,10 @@ struct menu_controls{
 };
 
 struct menu_slider{
-  int16_t value;
-  int16_t min;
-  int16_t max;
-  int16_t step;
+  int32_t value;
+  int32_t min;
+  int32_t max;
+  int32_t step;
 };
 
 struct menu_toggle{

@@ -9,7 +9,8 @@ static struct menu_option* selected = NULL;
 static char str[30];
 static uint8_t len;
 
-static const uint8_t gfx_cursor[]  = {0x00, 0x66, 0x3C, 0x18, 0x00};
+static const uint8_t gfx_cursor[]  = {0x00, 0x7E, 0x3C, 0x18, 0x00};
+static const uint8_t gfx_discursor[] = {0x00, 0x42, 0x24, 0x18, 0x00};
 static const uint8_t gfx_btn_on[]  = {0xE0, 0xF8, 0xF8, 0xE0, 0x00};
 static const uint8_t gfx_btn_off[] = {0xE0, 0xFE, 0xFE, 0xE0, 0x00};
 static const uint8_t gfx_tgl_on[]  = {0xE0, 0xF0, 0xF8, 0xE6, 0x00};
@@ -18,6 +19,8 @@ static const uint8_t gfx_slider[]  = {0x08, 0xFE, 0xFE, 0x08, 0x00};
 static const uint8_t gfx_submenu[] = {0x00, 0xE0, 0x18, 0x06, 0x00};
 static const uint8_t gfx_mode[]    = {0x10, 0x54, 0x38, 0x10, 0x00};
 static const uint8_t gfx_back[]    = {0x10, 0x38, 0x54, 0x10, 0x00};
+static const uint8_t gfx_label[]   = {0x00, 0x18, 0x18, 0x00, 0x00};
+static const uint8_t gfx_value[]   = {0x28, 0x7C, 0x28, 0x7C, 0x00};
 
 struct menu_controls controls = {};
 
@@ -66,18 +69,26 @@ void menu_redraw(){
   uint8_t scrn_cursor = 0;
   struct menu_option* option;
   while(scrn_cursor < SCREEN_HEIGHT && cursor < menu->_len){
+    option = &menu->options[cursor];
+
     if (menu->_scrn_cursor == scrn_cursor){
       HX1230_SetXY(0, scrn_cursor);
-      HX1230_Draw(gfx_cursor, NUMEL(gfx_cursor));
+
+      // INT32 has the biggest value that can be modified
+      HX1230_Draw(option->type > INT32 ? gfx_cursor : gfx_discursor, NUMEL(gfx_cursor));
     }
 
-    option = &menu->options[cursor];
     
     HX1230_SetXY(NUMEL(gfx_cursor), scrn_cursor);
 
     switch(option->type){
-      case VALUE:
-        len = sprintf(str, option->name, *(int16_t*)option->data);
+      case STRING:
+        HX1230_Draw(gfx_value, NUMEL(gfx_cursor));
+        len = sprintf(str, option->name, (char*)option->data);
+        break;
+      case INT32:
+        HX1230_Draw(gfx_value, NUMEL(gfx_cursor));
+        len = sprintf(str, option->name, *(int32_t*)option->data);
         break;
       case MODE:
         HX1230_Draw(gfx_mode, NUMEL(gfx_cursor));
@@ -97,11 +108,14 @@ void menu_redraw(){
       case SLIDER:
         HX1230_Draw(gfx_slider, NUMEL(gfx_cursor));
         break;
+      case LABEL:
+        HX1230_Draw(gfx_label, NUMEL(gfx_cursor));
+        break;
       default:
         break;
     }
 
-    if (option->type != VALUE) 
+    if (option->type != STRING && option->type != INT32) 
       len = sprintf(str, option->name);
     HX1230_PrintField(scrn_cursor, 2*NUMEL(gfx_cursor), HX1230_COLS, str, len);
 
@@ -215,7 +229,7 @@ static void slider_redraw(struct menu_slider *const slider){
   // clear space between nubmer and slide
   HX1230_PrintField(menu->_scrn_cursor, HX1230_COLS - 54 - 4, HX1230_COLS - 54, NULL, 0);
 
-  len = sprintf(str, "%i", slider->value);
+  len = sprintf(str, "%li", slider->value);
   HX1230_PrintField(menu->_scrn_cursor, 2*NUMEL(gfx_cursor), HX1230_COLS - 54 - 4, str, len);
   
   HX1230_SetXY(HX1230_COLS - 54, menu->_scrn_cursor);

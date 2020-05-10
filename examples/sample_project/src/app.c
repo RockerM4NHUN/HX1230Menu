@@ -93,8 +93,8 @@ void update_joystick(){
 void joystick_default_calibration(){
   joystick.xoffs = 1735;
   joystick.yoffs = 1712;
-  joystick.xdead = 14;
-  joystick.ydead = 12;
+  joystick.xdead = 40;
+  joystick.ydead = 20;
 }
 
 void calibrate_joystick(){
@@ -127,10 +127,10 @@ void menu_refresh_controls(struct menu_controls* controls){
   static int16_t up_down_level = 0;
   static int16_t plus_minus_level = 0;
 
-  up_down_level += abs(joystick.y)*joystick.y;
-  plus_minus_level += abs(joystick.x)*joystick.x;
+  up_down_level += abs(joystick.y) < 90 ? joystick.y : joystick.y*8;
+  plus_minus_level += abs(joystick.x) < 90 ? joystick.x : joystick.x*8;
 
-  const int16_t limit = 9000;
+  const int16_t limit = 90*8;
 
   controls->up = up_down_level > limit;
   controls->down = up_down_level < -limit;
@@ -146,14 +146,14 @@ void menu_refresh_controls(struct menu_controls* controls){
   prev_button = joystick.button == debounce_cycles;
 }
 
-int16_t time_value;
+int32_t time_value;
 void menu_redraw_loop(){
   static uint32_t next = 0;
   uint32_t tick = HAL_GetTick();
   if (tick > next){
     
     // if getters are needed for menu values, they should be here
-    time_value = tick & 0xFFFF;
+    time_value = tick;
     
     menu_redraw();
     next = tick + 250;
@@ -176,9 +176,9 @@ void joystick_test_loop(){
     HX1230_PrintField(line++, 1, 40, str, len);
     len = sprintf(str, "Y: %i", joystick.y);
     HX1230_PrintField(line++, 1, 40, str, len);
-    len = sprintf(str, "sqr(X): %i", abs(joystick.x)*joystick.x);
+    len = sprintf(str, "ctrl(X): %i", abs(joystick.x) < 90 ? joystick.x : joystick.x*8);
     HX1230_PrintField(line++, 1, 70, str, len);
-    len = sprintf(str, "sqr(Y): %i", abs(joystick.y)*joystick.y);
+    len = sprintf(str, "ctrl(Y): %i", abs(joystick.y) < 90 ? joystick.y : joystick.y*8);
     HX1230_PrintField(line++, 1, 70, str, len);
     len = sprintf(str, "xoffs: %i", joystick.xoffs);
     HX1230_PrintField(line++, 1, 70, str, len);
@@ -244,44 +244,44 @@ struct submenu_t sub_menu = {
     {BUTTON, "Set zero 2",  NULL,         &set_zero_button2},
     {TOGGLE, "Toggle 2",    NULL,         &test_toggle2},
     {SLIDER, "Slider 2",    NULL,         &setpoint_slider2},
-    {VALUE,  "Slider2: %i", NULL,         &setpoint_slider2.value},
-    {VALUE,  "Time (ms): %i", NULL,         &time_value},
+    {INT32,  "Slider2: %i", NULL,         &setpoint_slider2.value},
+    {INT32,  "Time (ms): %i", NULL,       &time_value},
     {MENU_END},
   },
 };
 
 struct submenu_t demo_menu = {
   .options = (struct menu_option[]){
-    {TITLE,  "Title"},
+    {LABEL,  "Label"},
     {MENU,   "Submenu",         NULL,         &sub_menu},
     {BUTTON, "Button",          NULL,         &set_zero_button},
     {TOGGLE, "Toggle",          NULL,         &test_toggle},
     {SLIDER, "Slider",          NULL,         &setpoint_slider},
     {MODE,   "Custom mode",     joystick_test_loop},
-    {VALUE,  "int16 value: %i", NULL,         &setpoint_slider.value},
-    {TITLE,  "-------"},
-    {TITLE,  "Lots"},
-    {TITLE,  "of"},
-    {TITLE,  "rows"},
-    {TITLE,  "are"},
-    {TITLE,  "possible!"},
-    {TITLE,  "-------"},
-    {TITLE,  "0000"},
-    {TITLE,  "0001"},
-    {TITLE,  "0011"},
-    {TITLE,  "0010"},
-    {TITLE,  "0110"},
-    {TITLE,  "0111"},
-    {TITLE,  "0101"},
-    {TITLE,  "0100"},
-    {TITLE,  "1100"},
-    {TITLE,  "1101"},
-    {TITLE,  "1111"},
-    {TITLE,  "1110"},
-    {TITLE,  "1010"},
-    {TITLE,  "1011"},
-    {TITLE,  "1001"},
-    {TITLE,  "1000"},
+    {INT32,  "int16 value: %i", NULL,         &setpoint_slider.value},
+    {LABEL,  "-------"},
+    {LABEL,  "Lots"},
+    {LABEL,  "of"},
+    {LABEL,  "rows"},
+    {LABEL,  "are"},
+    {LABEL,  "possible!"},
+    {LABEL,  "-------"},
+    {LABEL,  "0000"},
+    {LABEL,  "0001"},
+    {LABEL,  "0011"},
+    {LABEL,  "0010"},
+    {LABEL,  "0110"},
+    {LABEL,  "0111"},
+    {LABEL,  "0101"},
+    {LABEL,  "0100"},
+    {LABEL,  "1100"},
+    {LABEL,  "1101"},
+    {LABEL,  "1111"},
+    {LABEL,  "1110"},
+    {LABEL,  "1010"},
+    {LABEL,  "1011"},
+    {LABEL,  "1001"},
+    {LABEL,  "1000"},
     {MENU_END},
   },
 };
